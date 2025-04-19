@@ -96,6 +96,8 @@ class DadosTab(ttk.Frame):
     
     def atualizar_dados(self, dados):
         self.app.dados_salvos = dados
+        # Mostrar dados imediatamente quando são atualizados
+        self.listar_dados(self.app.dados_salvos)
     
     def atualizar_tabela(self):
         self.listar_dados(self.app.dados_salvos)
@@ -108,7 +110,7 @@ class DadosTab(ttk.Frame):
             self.tabela.delete(item)
         
         if not dados:
-            messagebox.showinfo("Informação", "Nenhum dado cadastrado.")
+            # Silently return without showing popup
             return
         
         first_item_id = None
@@ -139,11 +141,6 @@ class DadosTab(ttk.Frame):
                 first_item_id = item_id
         
         self.adicionar_botoes_acoes()
-        
-        if first_item_id:
-            self.tabela.selection_set(first_item_id)
-            self.tabela.focus(first_item_id)
-            self.iniciar_edicao(0)
     
     def adicionar_botoes_acoes(self):
         self.tabela.bind("<ButtonRelease-1>", self.on_tabela_click)

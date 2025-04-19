@@ -14,7 +14,7 @@ class ClimaTab(ttk.Frame):
         self.configurar_aba_clima()
     
     def configurar_aba_clima(self):
-        frame = ttk.LabelFrame(self.tab_clima, text="Dados Climáticos para Monitoramento de Soja")
+        frame = ttk.LabelFrame(self.tab_clima, text="Dados Climáticos para Monitoramento")
         frame.pack(fill="both", expand=True, padx=20, pady=20)
 
         atual_frame = ttk.LabelFrame(frame, text="Condições Climáticas Atuais")
@@ -63,15 +63,13 @@ class ClimaTab(ttk.Frame):
         try:
             self.dados_clima = clima.obter_dados_climaticos(self.latitude, self.longitude)
             if not self.dados_clima:
-                messagebox.showerror("Erro", "Não foi possível obter dados climáticos.")
                 return
             
             self.exibir_clima_atual(self.dados_clima)
-            
             self.alternar_modo_exibicao()
             
         except Exception as e:
-            messagebox.showerror("Erro", f"Erro ao buscar dados climáticos: {str(e)}")
+            print(f"Erro ao buscar dados climáticos: {str(e)}")
     
     def alternar_modo_exibicao(self):
         try:
@@ -108,11 +106,41 @@ class ClimaTab(ttk.Frame):
             
             self.clima_atual_text.config(state=tk.NORMAL)
             self.clima_atual_text.delete(1.0, tk.END)
-            self.clima_atual_text.insert(tk.END, texto)
+            
+            # Verificar se existem dados de lote cadastrados
+            tem_dados_lote = bool(self.app.dados_salvos)
+            
+            if tem_dados_lote:
+                # Se tem dados de lote, adicionar informações sobre o estado da plantação
+                temp_atual = dados.get('current', {}).get('temperature_2m', 0)
+                umidade_atual = dados.get('current', {}).get('relative_humidity_2m', 0)
+                
+                self.clima_atual_text.insert(tk.END, texto)
+                self.clima_atual_text.insert(tk.END, "\n\nEstado da plantação baseado nos sensores:\n")
+                
+                # Verificar temperatura
+                if temp_atual > 30:
+                    self.clima_atual_text.insert(tk.END, f"\n⚠️ Temperatura alta pode prejudicar o desenvolvimento.")
+                elif temp_atual < 15:
+                    self.clima_atual_text.insert(tk.END, f"\n⚠️ Temperatura baixa pode retardar o crescimento.")
+                else:
+                    self.clima_atual_text.insert(tk.END, f"\n✅ Temperatura adequada para o desenvolvimento.")
+                
+                # Verificar umidade
+                if umidade_atual > 80:
+                    self.clima_atual_text.insert(tk.END, f"\n⚠️ Umidade muito alta, risco de doenças fúngicas.")
+                elif umidade_atual < 30:
+                    self.clima_atual_text.insert(tk.END, f"\n⚠️ Umidade muito baixa, pode ser necessário irrigação.")
+                else:
+                    self.clima_atual_text.insert(tk.END, f"\n✅ Umidade adequada para o desenvolvimento.")
+            else:
+                # Se não tem dados de lote, mostrar apenas informações climáticas
+                self.clima_atual_text.insert(tk.END, texto)
+            
             self.clima_atual_text.config(state=tk.DISABLED)
             
         except Exception as e:
-            messagebox.showerror("Erro", f"Erro ao exibir clima atual: {str(e)}")
+            print(f"Erro ao exibir clima atual: {str(e)}")
     
     def exibir_historico_climatico(self, dados):
         try:

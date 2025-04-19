@@ -191,3 +191,35 @@ class DatabaseManager:
         except Exception as e:
             print(f"Erro ao salvar dados climáticos: {str(e)}")
             raise
+            
+    def obter_dados_climaticos_historicos(self, limite=10):
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute("""
+                SELECT data, temperatura, umidade, precipitacao, codigo_clima, descricao_clima, velocidade_vento
+                FROM DadosClimaticos
+                ORDER BY data DESC
+                LIMIT ?
+            """, (limite,))
+            
+            registros = cursor.fetchall()
+            
+            dados = []
+            for registro in registros:
+                dados.append({
+                    "data": registro[0],
+                    "temperatura": registro[1],
+                    "umidade": registro[2],
+                    "precipitacao": registro[3],
+                    "codigo_clima": registro[4],
+                    "descricao_clima": registro[5],
+                    "velocidade_vento": registro[6]
+                })
+            
+            conn.close()
+            return dados
+        except Exception as e:
+            print(f"Erro ao obter dados climáticos históricos: {str(e)}")
+            return []
