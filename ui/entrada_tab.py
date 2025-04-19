@@ -10,38 +10,68 @@ class EntradaTab(ttk.Frame):
         self.configurar_aba()
     
     def configurar_aba(self):
-        frame = ttk.LabelFrame(self, text="Entrada de Dados de Plantio")
-        frame.pack(fill="both", expand=True, padx=20, pady=20)
+        self.main_frame = ttk.Frame(self)
+        self.main_frame.pack(fill="both", expand=True, padx=20, pady=20)
         
-        ttk.Label(frame, text="Nome do Talhão:").grid(row=0, column=0, sticky=tk.W, padx=10, pady=5)
-        self.nome_lote_entry = ttk.Entry(frame, width=40)
+        # Welcome screen
+        self.welcome_frame = ttk.Frame(self.main_frame)
+        self.welcome_frame.pack(fill="both", expand=True)
+        
+        # Title with larger font
+        title_label = ttk.Label(self.welcome_frame, text="FarmTech Solutions: Agricultura de Precisão", font=("Helvetica", 16, "bold"))
+        title_label.pack(pady=(30, 20))
+        
+        # Welcome text
+        welcome_text = "Bem-vindo ao futuro da agricultura. Nossa plataforma oferece insights valiosos para maximizar a produtividade e a sustentabilidade de suas colheitas. Monitore e gerencie suas operações agrícolas com facilidade."
+        message_label = ttk.Label(self.welcome_frame, text=welcome_text, wraplength=600, justify="center")
+        message_label.pack(pady=20, padx=50)
+        
+        # Button to show input form
+        btn_frame = ttk.Frame(self.welcome_frame)
+        btn_frame.pack(pady=30)
+        ttk.Button(btn_frame, text="Adicionar Dados", command=self.mostrar_formulario).pack()
+        
+        # Input form (initially hidden)
+        self.form_frame = ttk.LabelFrame(self.main_frame, text="Entrada de Dados de Plantio")
+        
+        ttk.Label(self.form_frame, text="Nome do Talhão:").grid(row=0, column=0, sticky=tk.W, padx=10, pady=5)
+        self.nome_lote_entry = ttk.Entry(self.form_frame, width=40)
         self.nome_lote_entry.grid(row=0, column=1, sticky=tk.W, padx=10, pady=5)
         
         self.cultura_var = tk.StringVar(value="0")
-        ttk.Label(frame, text="Cultura:").grid(row=1, column=0, sticky=tk.W, padx=10, pady=5)
-        cultura_frame = ttk.Frame(frame)
+        ttk.Label(self.form_frame, text="Cultura:").grid(row=1, column=0, sticky=tk.W, padx=10, pady=5)
+        cultura_frame = ttk.Frame(self.form_frame)
         cultura_frame.grid(row=1, column=1, sticky=tk.W, padx=10, pady=5)
         ttk.Radiobutton(cultura_frame, text="Soja", variable=self.cultura_var, value="0").pack(side=tk.LEFT, padx=5)
         ttk.Radiobutton(cultura_frame, text="Milho", variable=self.cultura_var, value="1").pack(side=tk.LEFT, padx=5)
         
-        ttk.Label(frame, text="Comprimento (m):").grid(row=2, column=0, sticky=tk.W, padx=10, pady=5)
-        self.comprimento_entry = ttk.Entry(frame, width=15)
+        ttk.Label(self.form_frame, text="Comprimento (m):").grid(row=2, column=0, sticky=tk.W, padx=10, pady=5)
+        self.comprimento_entry = ttk.Entry(self.form_frame, width=15)
         self.comprimento_entry.grid(row=2, column=1, sticky=tk.W, padx=10, pady=5)
         
-        ttk.Label(frame, text="Largura (m):").grid(row=3, column=0, sticky=tk.W, padx=10, pady=5)
-        self.largura_entry = ttk.Entry(frame, width=15)
+        ttk.Label(self.form_frame, text="Largura (m):").grid(row=3, column=0, sticky=tk.W, padx=10, pady=5)
+        self.largura_entry = ttk.Entry(self.form_frame, width=15)
         self.largura_entry.grid(row=3, column=1, sticky=tk.W, padx=10, pady=5)
         
-        btn_frame = ttk.Frame(frame)
-        btn_frame.grid(row=4, column=0, columnspan=2, pady=15)
+        form_btn_frame = ttk.Frame(self.form_frame)
+        form_btn_frame.grid(row=4, column=0, columnspan=2, pady=15)
         
-        ttk.Button(btn_frame, text="Processar e Salvar", command=self.processar_e_salvar).pack(side=tk.LEFT, padx=5)
+        ttk.Button(form_btn_frame, text="Processar e Salvar", command=self.processar_e_salvar).pack(side=tk.LEFT, padx=5)
+        ttk.Button(form_btn_frame, text="Voltar", command=self.voltar_para_welcome).pack(side=tk.LEFT, padx=5)
         
-        ttk.Label(frame, text="Resultado:").grid(row=5, column=0, sticky=tk.NW, padx=10, pady=5)
-        self.resultado_text = scrolledtext.ScrolledText(frame, width=60, height=10, wrap=tk.WORD)
+        ttk.Label(self.form_frame, text="Resultado:").grid(row=5, column=0, sticky=tk.NW, padx=10, pady=5)
+        self.resultado_text = scrolledtext.ScrolledText(self.form_frame, width=60, height=10, wrap=tk.WORD)
         self.resultado_text.grid(row=5, column=1, sticky=tk.EW, padx=10, pady=5)
         self.resultado_text.config(state=tk.DISABLED)
     
+    def mostrar_formulario(self):
+        self.welcome_frame.pack_forget()
+        self.form_frame.pack(fill="both", expand=True, padx=20, pady=20)
+    
+    def voltar_para_welcome(self):
+        self.form_frame.pack_forget()
+        self.welcome_frame.pack(fill="both", expand=True)
+        
     def processar(self):
         self.processar_e_salvar()
     

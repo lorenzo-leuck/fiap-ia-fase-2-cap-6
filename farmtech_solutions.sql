@@ -150,21 +150,3 @@ CREATE TABLE FarmTechDados (
     comprimento INTEGER NOT NULL,
     largura INTEGER NOT NULL
 );
-
-
-
--- Inserção de dados de exemplo para tipos de cultura
-INSERT INTO TipoCultura (NomeCultura, DescricaoCultura, TempoMedioCiclo, NecessidadeHidricaMedia, NecessidadeNutrientesMedia)
-VALUES ('Soja', 'Cultura de grãos oleaginosos, rica em proteínas', 120, 450, 'NPK 00-20-20');
-
-INSERT INTO TipoCultura (NomeCultura, DescricaoCultura, TempoMedioCiclo, NecessidadeHidricaMedia, NecessidadeNutrientesMedia)
-VALUES ('Milho', 'Cereal utilizado para alimentação humana e animal', 150, 600, 'NPK 04-14-08');
-
-INSERT INTO TipoCultura (NomeCultura, DescricaoCultura, TempoMedioCiclo, NecessidadeHidricaMedia, NecessidadeNutrientesMedia)
-VALUES ('Algodão', 'Cultura de fibra natural utilizada na indústria têxtil', 180, 700, 'NPK 04-20-20');
-
-INSERT INTO TipoCultura (NomeCultura, DescricaoCultura, TempoMedioCiclo, NecessidadeHidricaMedia, NecessidadeNutrientesMedia)
-VALUES ('Café', 'Cultura perene produtora de grãos para bebidas', 730, 1500, 'NPK 20-05-20');
-
-INSERT INTO TipoCultura (NomeCultura, DescricaoCultura, TempoMedioCiclo, NecessidadeHidricaMedia, NecessidadeNutrientesMedia)
-VALUES ('Cana-de-açúcar', 'Cultura semi-perene utilizada para produção de açúcar e etanol', 365, 1500, 'NPK 05-25-25');
