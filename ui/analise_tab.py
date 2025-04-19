@@ -38,10 +38,10 @@ class AnaliseTab(ttk.Frame):
             temp_atual = dados_previsao.get('current', {}).get('temperature_2m', 0)
             umidade_atual = dados_previsao.get('current', {}).get('relative_humidity_2m', 0)
             
-            self.analise_text.insert(tk.END, f"Sensores de temperatura e umidade apresentam uma média de {temp_atual:.1f}°C e {umidade_atual:.1f}%\n")
+            self.analise_text.insert(tk.END, f"Sensores de temperatura e umidade relativa apresentam uma média de {temp_atual:.1f}°C e {umidade_atual:.1f}%\n")
             
             estado_ideal = True
-            if temp_atual > 30 or temp_atual < 15 or umidade_atual > 80 or umidade_atual < 30:
+            if temp_atual > 35 or temp_atual < 10 or umidade_atual > 90 or umidade_atual < 20:
                 estado_ideal = False
             
             if estado_ideal:
@@ -83,19 +83,12 @@ class AnaliseTab(ttk.Frame):
         resultado = ""
         avisos = []
         
-        if temp_media > 30:
+        if temp_media > 35:
             avisos.append(f"⚠️ Temperatura média muito alta ({temp_media:.1f}°C). Pode prejudicar o desenvolvimento das plantas.")
-        elif temp_media < 15:
+        elif temp_media < 10:
             avisos.append(f"⚠️ Temperatura média muito baixa ({temp_media:.1f}°C). Pode retardar o crescimento das plantas.")
         else:
             avisos.append(f"✅ Temperatura média ({temp_media:.1f}°C) favorável para o plantio.")
-        
-        if umidade_media > 80:
-            avisos.append(f"⚠️ Sensores de umidade estão muito altos ({umidade_media:.1f}%). Risco de doenças fúngicas.")
-        elif umidade_media < 30:
-            avisos.append(f"⚠️ Umidade média muito baixa ({umidade_media:.1f}%). Pode ser necessário irrigação.")
-        else:
-            avisos.append(f"✅ Umidade média ({umidade_media:.1f}%) favorável para o plantio.")
         
         if precip_total > 50:
             avisos.append(f"⚠️ Precipitação acumulada alta ({precip_total:.1f}mm). Risco de encharcamento do solo.")
@@ -103,6 +96,13 @@ class AnaliseTab(ttk.Frame):
             avisos.append(f"⚠️ Precipitação acumulada baixa ({precip_total:.1f}mm). Pode ser necessário irrigação.")
         else:
             avisos.append(f"✅ Precipitação acumulada ({precip_total:.1f}mm) favorável para o plantio.")
+        
+        if umidade_media > 90:
+            avisos.append(f"⚠️ Umidade relativa média muito alta ({umidade_media:.1f}%). Risco de doenças fúngicas.")
+        elif umidade_media < 20:
+            avisos.append(f"⚠️ Umidade relativa média muito baixa ({umidade_media:.1f}%). Pode ser necessário irrigação.")
+        else:
+            avisos.append(f"✅ Umidade relativa média ({umidade_media:.1f}%) favorável para o plantio.")
         
         resultado = "\n".join(avisos)
         
@@ -128,16 +128,16 @@ class AnaliseTab(ttk.Frame):
         resultado = ""
         avisos = []
         
-        if temp_media > 30:
+        if temp_media > 35:
             avisos.append(f"⚠️ Previsão de temperatura média alta ({temp_media:.1f}°C) para os próximos dias.")
-        elif temp_media < 15:
+        elif temp_media < 10:
             avisos.append(f"⚠️ Previsão de temperatura média baixa ({temp_media:.1f}°C) para os próximos dias.")
         else:
             avisos.append(f"✅ Previsão de temperatura média favorável ({temp_media:.1f}°C) para os próximos dias.")
         
-        if precip_total > 30:
+        if precip_total > 50:
             avisos.append(f"⚠️ Previsão de precipitação acumulada alta ({precip_total:.1f}mm) para os próximos dias.")
-        elif precip_total < 5:
+        elif precip_total < 10:
             avisos.append(f"⚠️ Previsão de precipitação acumulada baixa ({precip_total:.1f}mm) para os próximos dias.")
         else:
             avisos.append(f"✅ Previsão de precipitação acumulada favorável ({precip_total:.1f}mm) para os próximos dias.")
