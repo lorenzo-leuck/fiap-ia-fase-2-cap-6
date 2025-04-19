@@ -18,6 +18,7 @@ class DadosTab(ttk.Frame):
         top_frame.pack(fill="x", expand=False, pady=10)
         
         ttk.Button(top_frame, text="Atualizar Tabela", command=self.atualizar_tabela).pack(side=tk.LEFT, padx=5)
+        ttk.Button(top_frame, text="Limpar Registros", command=self.limpar_todos_registros).pack(side=tk.LEFT, padx=5)
         
         table_frame = ttk.LabelFrame(main_frame, text="Dados Cadastrados")
         table_frame.pack(fill="both", expand=True, padx=5, pady=5)
@@ -82,8 +83,11 @@ class DadosTab(ttk.Frame):
         buttons_frame = ttk.Frame(self.edicao_frame)
         buttons_frame.pack(fill="x", expand=True, padx=10, pady=10)
         
-        self.salvar_edicao_btn = ttk.Button(buttons_frame, text="Salvar Alterações", command=self.salvar_edicao, state=tk.DISABLED)
+        self.salvar_edicao_btn = ttk.Button(buttons_frame, text="Salvar", command=self.salvar_edicao, state=tk.DISABLED)
         self.salvar_edicao_btn.pack(side=tk.LEFT, padx=5)
+        
+        self.deletar_btn = ttk.Button(buttons_frame, text="Deletar", command=self.deletar_item_em_edicao, state=tk.DISABLED)
+        self.deletar_btn.pack(side=tk.LEFT, padx=5)
         
         self.cancelar_edicao_btn = ttk.Button(buttons_frame, text="Cancelar", command=self.cancelar_edicao, state=tk.DISABLED)
         self.cancelar_edicao_btn.pack(side=tk.LEFT, padx=5)
@@ -107,6 +111,8 @@ class DadosTab(ttk.Frame):
             messagebox.showinfo("Informação", "Nenhum dado cadastrado.")
             return
         
+        first_item_id = None
+        
         for i, dado in enumerate(dados):
             nome_lote = dado["nome_lote"]
             cultura_idx = dado["cultura"]
@@ -126,39 +132,34 @@ class DadosTab(ttk.Frame):
                 insumo_info['nome'],
                 f"{insumo_info['taxa']} mL/m²",
                 f"{insumo_info['quantidade_total']/1000:.2f} L",
-                "Ações"
+                "Clique para editar"
             ))
             
-            self.tabela.tag_bind(item_id, '<Double-1>', lambda event, idx=i: self.iniciar_edicao(idx))
+            if i == 0:
+                first_item_id = item_id
         
         self.adicionar_botoes_acoes()
+        
+        if first_item_id:
+            self.tabela.selection_set(first_item_id)
+            self.tabela.focus(first_item_id)
+            self.iniciar_edicao(0)
     
     def adicionar_botoes_acoes(self):
-        self.tabela.bind("<Double-1>", self.on_tabela_double_click)
+        self.tabela.bind("<ButtonRelease-1>", self.on_tabela_click)
         
         for i, item_id in enumerate(self.tabela.get_children()):
-            self.tabela.set(item_id, "acoes", "Editar / Deletar")
+            self.tabela.set(item_id, "acoes", "Clique para editar")
     
-    def on_tabela_double_click(self, event):
+    def on_tabela_click(self, event):
         item_id = self.tabela.identify_row(event.y)
         if not item_id:
             return
             
-        coluna = self.tabela.identify_column(event.x)
-        coluna_idx = int(coluna.replace('#', '')) - 1
-        
         indice = self.tabela.index(item_id)
-        
-        if coluna_idx == 8:
-            self.mostrar_menu_acoes(event, indice)
-        else:
-            self.iniciar_edicao(indice)
+        self.iniciar_edicao(indice)
     
-    def mostrar_menu_acoes(self, event, indice):
-        menu = tk.Menu(self, tearoff=0)
-        menu.add_command(label="Editar", command=lambda: self.iniciar_edicao(indice))
-        menu.add_command(label="Deletar", command=lambda: self.confirmar_delecao(indice))
-        menu.tk_popup(event.x_root, event.y_root)
+
     
     def iniciar_edicao(self, indice):
         if indice < 0 or indice >= len(self.app.dados_salvos):
@@ -182,6 +183,7 @@ class DadosTab(ttk.Frame):
         self.item_em_edicao = indice
         
         self.salvar_edicao_btn.config(state=tk.NORMAL)
+        self.deletar_btn.config(state=tk.NORMAL)
         self.cancelar_edicao_btn.config(state=tk.NORMAL)
     
     def cancelar_edicao(self):
@@ -195,6 +197,7 @@ class DadosTab(ttk.Frame):
         self.item_em_edicao = None
         
         self.salvar_edicao_btn.config(state=tk.DISABLED)
+        self.deletar_btn.config(state=tk.DISABLED)
         self.cancelar_edicao_btn.config(state=tk.DISABLED)
     
     def salvar_edicao(self):
@@ -235,15 +238,17 @@ class DadosTab(ttk.Frame):
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao atualizar dados: {str(e)}")
     
-    def confirmar_delecao(self, indice):
-        if indice < 0 or indice >= len(self.app.dados_salvos):
+    def deletar_item_em_edicao(self):
+        if self.item_em_edicao is None:
             return
             
+        indice = self.item_em_edicao
         dado = self.app.dados_salvos[indice]
         nome_lote = dado["nome_lote"]
         
         if messagebox.askyesno("Confirmar Deleção", f"Tem certeza que deseja deletar o lote '{nome_lote}'?"):
             self.deletar_item(indice)
+            self.cancelar_edicao()
     
     def deletar_item(self, indice):
         try:
@@ -260,3 +265,23 @@ class DadosTab(ttk.Frame):
             
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao deletar dados: {str(e)}")
+    
+    def limpar_todos_registros(self):
+        if not self.app.dados_salvos:
+            messagebox.showinfo("Informação", "Não há registros para limpar.")
+            return
+            
+        if messagebox.askyesno("Confirmar Limpeza", "Tem certeza que deseja limpar TODOS os registros? Esta ação não pode ser desfeita."):
+            try:
+                for dado in self.app.dados_salvos:
+                    registro_id = dado["id"]
+                    self.app.db_manager.deletar_dados(registro_id)
+                
+                self.app.dados_salvos = []
+                self.listar_dados()
+                self.cancelar_edicao()
+                
+                messagebox.showinfo("Sucesso", "Todos os registros foram removidos com sucesso!")
+                
+            except Exception as e:
+                messagebox.showerror("Erro", f"Erro ao limpar registros: {str(e)}")
