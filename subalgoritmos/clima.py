@@ -48,8 +48,8 @@ def obter_dados_climaticos(latitude, longitude):
             "current": "temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m",
             "daily": "weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum",
             "timezone": "America/Sao_Paulo",
-            "past_days": 14,
-            "forecast_days": 1
+            "past_days": 7,
+            "forecast_days": 7
         }
         
         response = requests.get(API_URL, params=params)
@@ -96,7 +96,6 @@ def formatar_dados_atuais(dados):
 
 def formatar_dados_historicos(dados):
     try:
-
         diarios = dados["daily"]
         datas = diarios["time"]
         temp_max = diarios["temperature_2m_max"]
@@ -104,15 +103,14 @@ def formatar_dados_historicos(dados):
         precipitacao = diarios["precipitation_sum"]
         codigos_clima = diarios["weather_code"]
         
-
         dados_tabela = []
         dados_banco = []
         
-        for i in range(len(datas)):
+        # Pegar apenas os dados históricos (primeiros 7 dias)
+        for i in range(7):
             data_formatada = datetime.fromisoformat(datas[i]).strftime("%d/%m/%Y")
             descricao = traduzir_codigo_clima(codigos_clima[i])
             
-
             dados_tabela.append({
                 "data": data_formatada,
                 "temp_max": f"{temp_max[i]:.1f}",
@@ -121,7 +119,6 @@ def formatar_dados_historicos(dados):
                 "clima": descricao
             })
             
-
             dados_banco.append({
                 "data": datas[i],
                 "temperatura": (temp_max[i] + temp_min[i]) / 2,  # Média das temperaturas
@@ -134,6 +131,34 @@ def formatar_dados_historicos(dados):
     except Exception as e:
         print(f"Erro ao formatar dados históricos: {str(e)}")
         return [], []
+
+def formatar_dados_previsao(dados):
+    try:
+        diarios = dados["daily"]
+        datas = diarios["time"]
+        temp_max = diarios["temperature_2m_max"]
+        temp_min = diarios["temperature_2m_min"]
+        precipitacao = diarios["precipitation_sum"]
+        codigos_clima = diarios["weather_code"]
+        
+        dados_tabela = []
+        
+        for i in range(7, len(datas)):
+            data_formatada = datetime.fromisoformat(datas[i]).strftime("%d/%m/%Y")
+            descricao = traduzir_codigo_clima(codigos_clima[i])
+            
+            dados_tabela.append({
+                "data": data_formatada,
+                "temp_max": f"{temp_max[i]:.1f}",
+                "temp_min": f"{temp_min[i]:.1f}",
+                "precipitacao": f"{precipitacao[i]:.1f}",
+                "clima": descricao
+            })
+        
+        return dados_tabela
+    except Exception as e:
+        print(f"Erro ao formatar dados de previsão: {str(e)}")
+        return []
 
 def analisar_impacto_soja(dados):
     try:
