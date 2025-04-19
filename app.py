@@ -31,7 +31,8 @@ class FarmTechApp(tk.Tk):
         try:
             self.dados_salvos = self.db_manager.carregar_dados()
             self.tab_dados.atualizar_dados(self.dados_salvos)
-            self.tab_clima.atualizar_lista_lotes(self.dados_salvos)
+            # Removido chamada para tab_clima.atualizar_lista_lotes pois a aba clima
+            # só precisa mostrar condições climáticas atuais e histórico
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao carregar dados: {str(e)}")
     
@@ -45,9 +46,9 @@ class FarmTechApp(tk.Tk):
         self.tab_analise = AnaliseTab(self.notebook, self)
         
         self.notebook.add(self.tab_entrada, text="Entrada de Dados")
-        self.notebook.add(self.tab_dados, text="Dados")
-        self.notebook.add(self.tab_clima, text="Dados Climáticos")
-        self.notebook.add(self.tab_analise, text="Análise de Impacto")
+        self.notebook.add(self.tab_dados, text="Lotes")
+        self.notebook.add(self.tab_clima, text="Clima")
+        self.notebook.add(self.tab_analise, text="Análise")
     
     def inicializar_interface(self):
         self.carregar_dados()
