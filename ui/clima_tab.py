@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext
+import datetime
 
 import subalgoritmos.clima as clima
 
@@ -11,6 +12,9 @@ class ClimaTab(ttk.Frame):
         self.latitude = app.latitude
         self.longitude = app.longitude
         self.tab_clima = self
+        self.dados_clima = None
+        self.dados_atuais_formatados = None
+        self.dados_historicos_formatados = None
         self.configurar_aba_clima()
     
     def configurar_aba_clima(self):
@@ -56,8 +60,68 @@ class ClimaTab(ttk.Frame):
         
         self.tabela_clima.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10, pady=10)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y, pady=10)
+            
+    def inicializar_com_dados(self, dados_clima, dados_atuais_formatados, dados_historicos_formatados):
+        self.dados_clima = dados_clima
+        self.dados_atuais_formatados = dados_atuais_formatados
+        self.dados_historicos_formatados = dados_historicos_formatados
         
-        ttk.Button(frame, text="Salvar Dados Climáticos no Banco", command=self.salvar_dados_climaticos).pack(pady=10)
+        if self.dados_clima:
+            # Exibir dados já carregados
+            self.exibir_clima_atual_com_dados(self.dados_atuais_formatados)
+            self.alternar_modo_exibicao()
+    
+    def exibir_clima_atual_com_dados(self, dados_atuais_formatados):
+        try:
+            self.dados_atuais_formatados = dados_atuais_formatados
+            
+            self.clima_atual_text.config(state=tk.NORMAL)
+            self.clima_atual_text.delete(1.0, tk.END)
+            
+            # Criar texto para exibição
+            data_hora = datetime.datetime.fromisoformat(dados_atuais_formatados["data"].replace('Z', '+00:00')).strftime("%d/%m/%Y %H:%M")
+            
+            texto = f"Data e hora: {data_hora}\n"
+            texto += f"Condição: {dados_atuais_formatados['descricao_clima']}\n"
+            texto += f"Temperatura: {dados_atuais_formatados['temperatura']}°C\n"
+            texto += f"Umidade: {dados_atuais_formatados.get('umidade', 'N/A')}%\n"
+            texto += f"Precipitação: {dados_atuais_formatados['precipitacao']} mm\n"
+            texto += f"Velocidade do vento: {dados_atuais_formatados.get('velocidade_vento', 'N/A')} km/h\n"
+            
+            # Verificar se existem dados de lote cadastrados
+            tem_dados_lote = bool(self.app.dados_salvos)
+            
+            if tem_dados_lote:
+                # Se tem dados de lote, adicionar informações sobre o estado da plantação
+                temp_atual = dados_atuais_formatados['temperatura']
+                umidade_atual = dados_atuais_formatados.get('umidade', 50)  # Valor padrão se não existir
+                
+                self.clima_atual_text.insert(tk.END, texto)
+                self.clima_atual_text.insert(tk.END, "\n\nEstado da plantação baseado nos sensores:\n")
+                
+                # Verificar temperatura
+                if temp_atual > 30:
+                    self.clima_atual_text.insert(tk.END, f"\n⚠️ Temperatura alta pode prejudicar o desenvolvimento.")
+                elif temp_atual < 15:
+                    self.clima_atual_text.insert(tk.END, f"\n⚠️ Temperatura baixa pode retardar o crescimento.")
+                else:
+                    self.clima_atual_text.insert(tk.END, f"\n✅ Temperatura adequada para o desenvolvimento.")
+                
+                # Verificar umidade
+                if umidade_atual > 80:
+                    self.clima_atual_text.insert(tk.END, f"\n⚠️ Umidade muito alta, risco de doenças fúngicas.")
+                elif umidade_atual < 30:
+                    self.clima_atual_text.insert(tk.END, f"\n⚠️ Umidade muito baixa, pode ser necessário irrigação.")
+                else:
+                    self.clima_atual_text.insert(tk.END, f"\n✅ Umidade adequada para o desenvolvimento.")
+            else:
+                # Se não tem dados de lote, mostrar apenas informações climáticas
+                self.clima_atual_text.insert(tk.END, texto)
+            
+            self.clima_atual_text.config(state=tk.DISABLED)
+            
+        except Exception as e:
+            print(f"Erro ao exibir clima atual com dados: {str(e)}")
     
     def buscar_dados_climaticos(self):
         try:
@@ -83,10 +147,8 @@ class ClimaTab(ttk.Frame):
             
             if modo == "historico":
                 dados_tabela, self.dados_historicos_formatados = clima.formatar_dados_historicos(self.dados_clima)
-                titulo = "Histórico Climático (7 dias)"
             else:
                 dados_tabela = clima.formatar_dados_previsao(self.dados_clima)
-                titulo = "Previsão Climática (7 dias)"
             
             for dado in dados_tabela:
                 self.tabela_clima.insert("", "end", values=(
