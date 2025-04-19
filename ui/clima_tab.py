@@ -1,6 +1,7 @@
 import tkinter as tk
-from tkinter import ttk, messagebox, scrolledtext
+from tkinter import ttk, messagebox, scrolledtext, filedialog
 import datetime
+import csv
 
 import subalgoritmos.clima as clima
 
@@ -39,6 +40,9 @@ class ClimaTab(ttk.Frame):
                        value="historico", command=self.alternar_modo_exibicao).pack(side=tk.LEFT, padx=10)
         ttk.Radiobutton(switch_frame, text="Previsão (7 dias)", variable=self.modo_exibicao, 
                        value="previsao", command=self.alternar_modo_exibicao).pack(side=tk.LEFT, padx=10)
+        
+        # Botão para baixar CSV
+        ttk.Button(switch_frame, text="Baixar CSV", command=self.exportar_csv).pack(side=tk.RIGHT, padx=10)
         
         colunas = ("data", "temp_max", "temp_min", "precipitacao", "clima")
         self.tabela_clima = ttk.Treeview(dados_frame, columns=colunas, show="headings", height=10)
@@ -252,4 +256,52 @@ class ClimaTab(ttk.Frame):
         
     def listar_dados(self):
         pass
+        
+    def exportar_csv(self):
+        try:
+            if not hasattr(self, 'dados_clima') or not self.dados_clima:
+                messagebox.showinfo("Informação", "Não há dados para exportar.")
+                return
+                
+            # Determinar o nome padrão do arquivo com base no modo atual
+            modo = self.modo_exibicao.get()
+            nome_padrao = "historico_climatico.csv" if modo == "historico" else "previsao_climatica.csv"
+            
+            # Abrir diálogo para salvar arquivo com nome padrão
+            filename = filedialog.asksaveasfilename(
+                defaultextension=".csv",
+                filetypes=[("CSV files", "*.csv"), ("All files", "*.*")],
+                title="Salvar dados como CSV",
+                initialfile=nome_padrao
+            )
+            
+            if not filename:  # Se o usuário cancelou o diálogo
+                return
+            
+            with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
+                writer = csv.writer(csvfile)
+                
+                # Escrever cabeçalho
+                writer.writerow(["Data", "Temperatura Máxima (°C)", "Temperatura Mínima (°C)", 
+                                "Precipitação (mm)", "Condição Climática"])
+                
+                # Escrever dados com base no modo de exibição atual
+                if modo == "historico":
+                    dados_tabela, _ = clima.formatar_dados_historicos(self.dados_clima)
+                else:
+                    dados_tabela = clima.formatar_dados_previsao(self.dados_clima)
+                
+                for dado in dados_tabela:
+                    writer.writerow([
+                        dado["data"],
+                        dado["temp_max"],
+                        dado["temp_min"],
+                        dado["precipitacao"],
+                        dado["clima"]
+                    ])
+            
+            messagebox.showinfo("Sucesso", f"Dados de {modo} exportados com sucesso para {filename}")
+            
+        except Exception as e:
+            messagebox.showerror("Erro", f"Erro ao exportar dados: {str(e)}")
 

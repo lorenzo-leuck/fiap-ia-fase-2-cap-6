@@ -1,5 +1,6 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, filedialog
+import csv
 
 from utils import CULTURAS, calcular_area, calcular_insumos
 
@@ -19,6 +20,7 @@ class DadosTab(ttk.Frame):
         
         ttk.Button(top_frame, text="Atualizar Tabela", command=self.atualizar_tabela).pack(side=tk.LEFT, padx=5)
         ttk.Button(top_frame, text="Limpar Registros", command=self.limpar_todos_registros).pack(side=tk.LEFT, padx=5)
+        ttk.Button(top_frame, text="Baixar CSV", command=self.exportar_csv).pack(side=tk.LEFT, padx=5)
         
         table_frame = ttk.LabelFrame(main_frame, text="Dados Cadastrados")
         table_frame.pack(fill="both", expand=True, padx=5, pady=5)
@@ -282,3 +284,54 @@ class DadosTab(ttk.Frame):
                 
             except Exception as e:
                 messagebox.showerror("Erro", f"Erro ao limpar registros: {str(e)}")
+    
+    def exportar_csv(self):
+        if not self.app.dados_salvos:
+            messagebox.showinfo("Informação", "Não há dados para exportar.")
+            return
+            
+        try:
+            # Abrir diálogo para salvar arquivo com nome padrão
+            filename = filedialog.asksaveasfilename(
+                defaultextension=".csv",
+                filetypes=[("CSV files", "*.csv"), ("All files", "*.*")],
+                title="Salvar dados como CSV",
+                initialfile="lotes.csv"
+            )
+            
+            if not filename:  # Se o usuário cancelou o diálogo
+                return
+                
+            with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
+                writer = csv.writer(csvfile)
+                
+                # Escrever cabeçalho
+                writer.writerow(["Nome do Lote", "Cultura", "Comprimento (m)", "Largura (m)", 
+                                "Área (m²)", "Insumo", "Taxa (mL/m²)", "Quantidade Total (L)"])
+                
+                # Escrever dados
+                for dado in self.app.dados_salvos:
+                    nome_lote = dado["nome_lote"]
+                    cultura_idx = dado["cultura"]
+                    comp = dado["comprimento"]
+                    larg = dado["largura"]
+                    area = calcular_area(comp, larg)
+                    insumo_info = calcular_insumos(area, cultura_idx)
+                    
+                    cultura_nome = "Soja" if cultura_idx == 0 else "Milho"
+                    
+                    writer.writerow([
+                        nome_lote,
+                        cultura_nome,
+                        comp,
+                        larg,
+                        int(area),
+                        insumo_info['nome'],
+                        insumo_info['taxa'],
+                        f"{insumo_info['quantidade_total']/1000:.2f}"
+                    ])
+            
+            messagebox.showinfo("Sucesso", f"Dados exportados com sucesso para {filename}")
+            
+        except Exception as e:
+            messagebox.showerror("Erro", f"Erro ao exportar dados: {str(e)}")
