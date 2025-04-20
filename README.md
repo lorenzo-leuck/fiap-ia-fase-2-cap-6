@@ -12,7 +12,7 @@ Para enfrentar esse desafio, implementamos um sistema de Agricultura de Precisã
    - Temperatura
    - Umidade relativa
    - Níveis de nutrientes
-   - 
+
 2. Interface em Python que consome dados SQL do sistema de monitoramento, permitindo:
    - Gerenciamento de dados da lavoura
    - Suporte à tomada de decisão
