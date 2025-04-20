@@ -9,24 +9,63 @@ As mudanças climáticas representam um desafio significativo para a produção 
 Para enfrentar esse desafio, implementamos um sistema de Agricultura de Precisão (AP) focado na cultura da soja e milho. Nossa solução integra:
 
 1. Rede de sensores inteligentes para monitoramento de:
-   - Umidade do solo
-   - pH do solo
+   - Temperatura
+   - Umidade relativa
    - Níveis de nutrientes
-
-2. Sistema de coleta e análise de dados que permite:
-   - Mapear a variabilidade espacial e temporal da lavoura
-   - Identificar áreas com diferentes potenciais produtivos
-   - Otimizar a aplicação de insumos conforme necessidade específica de cada área
-
-3. Interface em Python que consome dados SQL do sistema de monitoramento, permitindo:
-   - Visualização de dados em tempo real
-   - Geração de mapas de recomendação
+   - 
+2. Interface em Python que consome dados SQL do sistema de monitoramento, permitindo:
+   - Gerenciamento de dados da lavoura
    - Suporte à tomada de decisão
 
+# Guia de instalação
+
+## Windows
+
+1. Instale o Python 3.8 ou superior:
+   - Baixe o instalador em [python.org](https://www.python.org/downloads/windows/)
+   - Durante a instalação, marque a opção "Add Python to PATH"
+
+2. Crie um ambiente virtual:
+   ```
+   python -m venv venv
+   venv\Scripts\activate
+   ```
+
+3. Instale as dependências:
+   ```
+   pip install -r requirements.txt
+   ```
+
+4. Execute a aplicação:
+   ```
+   python app.py
+   ```
+
+## Linux
+
+1. Instale o Python e o Tkinter:
+   ```
+   sudo apt update
+   sudo apt install python3 python3-pip python3-venv python3-tk
+   ```
+
+2. Crie um ambiente virtual:
+   ```
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+
+3. Instale as dependências:
+   ```
+   pip install -r requirements.txt
+   ```
+
+4. Execute a aplicação:
+   ```
+   python3 app.py
+   ```
 ## Benefícios
 
-- Redução no uso de insumos agrícolas
-- Aumento da produtividade
 - Maior resiliência a eventos climáticos extremos
 - Sustentabilidade ambiental e econômica
 
@@ -40,5 +79,21 @@ A Agricultura de Precisão permite superar essas limitações ao completar o cic
 
 Grego, C. R.; Speranza, E. A.; et al. Agricultura de precisão. In: BERNARDI, A. C. de C.; NAIME, J. de M.; RESENDE, A. V. de; BASSOI, L. H.; INAMASU, R. Y. (Ed.). Agricultura digital: pesquisa, desenvolvimento e inovação nas cadeias produtivas. Brasília, DF: Embrapa, 2020. p. 166-188. Disponível em: https://www.alice.cnptia.embrapa.br/handle/doc/1126213
 
-## Observações
+# Uso da Plataforma
+
+A interface da aplicação FarmTech Solutions é dividida em quatro abas principais:
+
+## Entrada de Dados
+Nesta aba você pode criar novos registros de lotes para monitoramento. Utilize este espaço para inserir informações sobre novas áreas de cultivo que deseja acompanhar.
+
+## Lotes
+Aqui você pode visualizar, editar ou excluir dados existentes dos lotes cadastrados. Esta seção permite o gerenciamento completo das informações já registradas no sistema.
+
+## Clima
+Esta aba apresenta o histórico climático e a previsão para os próximos sete dias. Utilize estas informações para planejar atividades agrícolas com base nas condições meteorológicas esperadas.
+
+## Análise
+Nesta seção você pode avaliar se as condições atuais são adequadas para o plantio. O sistema analisa os dados coletados e fornece recomendações sobre a viabilidade do cultivo nas condições presentes.
+
+# Observações
 O Schema dos dados é o mesmo da atividade anterior. Contudo,o Database da oracle não foi utilizado pois o breve guia de acesso remoto, apresentado no meio de uma das vídeoaulas, não funciona.
